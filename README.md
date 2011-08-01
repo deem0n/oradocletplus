@@ -21,7 +21,7 @@ ORADOCLETPLUS
 Usage
 -----
 
-java -jar oradocletplus.jar username/password@hostname:port:sid <output_directory> [<copyright_notice>]
+java -jar oradocletplus.jar username/password@hostname:port:sid &lt;output_directory> [&lt;copyright_notice>]
 
 for example - 
 
