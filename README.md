@@ -18,3 +18,11 @@ ORADOCLETPLUS
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
+Usage
+-----
+
+java -jar oradocletplus.jar username/password@hostname:port:sid <output_directory> [<copyright_notice>]
+
+for example - 
+
+java -jar oradocletplus.jar fred/password@localhost:1521:mydb c:/temp/oradocs "My Company Inc."
