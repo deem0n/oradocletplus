@@ -305,7 +305,10 @@ if(dbobject.getObjectName().equalsIgnoreCase("TERMS_BUCHUNG")) {
 */
 // DEBUG
         if(attrTable.size() > 0) {
-            String ancor = "#" + dbobject.getObjectType().substring(0, 1).toLowerCase() + "-" + sectionName.toLowerCase(); 
+
+            String ancor =
+                    dbobject.getObjectType().substring(0, 1).toLowerCase() + "-"
+                            + sectionName.toLowerCase();
             aName(ancor);
             p();
             h3();

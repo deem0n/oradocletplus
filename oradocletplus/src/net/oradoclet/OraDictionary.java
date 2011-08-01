@@ -270,7 +270,7 @@ public class OraDictionary {
             if(null!=dbobject.getParent()) {
                 link = dbobject.getParent().getObjectType().toLowerCase()
                     + "-"
-                    + dbobject.getParent().getObjectName().toUpperCase() 
+                    + dbobject.getParent().getObjectName().toLowerCase() 
                     + ".html#" + dbobject.getObjectType().toLowerCase().substring(0,3) 
                     + "-" 
                     + dbobject.getObjectName().toLowerCase().replace('\\', '_').replace('/', '_').replace(':', '_');
