@@ -21,7 +21,7 @@ The tool will automatically generate a set of HTML documents based on the Oracle
 
 I threw these changes together as I needed to generate some database schema documentation quickly and found the OraDocletPlus to be a pretty good solution, although it had a couple of bugs, looked very out of date and hasn’t been updated in quite a while.
 
-Note that the original author of OraDoclet were Vladimir Katchourovski & Richard Nichols – kudos to them for creating a concise & simple tool.
+Note that the original author of OraDoclet was Vladimir Katchourovski – kudos to him for creating a concise & simple tool.
 
 Usage
 -----
