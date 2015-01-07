@@ -19,7 +19,7 @@ OraDocletPlus is an enhanced version of the OraDoclet database documentation gen
 
 The tool will automatically generate a set of HTML documents based on the Oracle database schema that you connect it to. It will pull our pretty much all meta-data about the schema, including indexes, column comments, foreign keys, and PL/SQL source code.
 
-I threw these changes together as I needed to generate some database schema documentation quickly and found the OraDocletPlus to be a pretty good solution, although it had a couple of bugs, looked very out of date and hasn’t been updated in quite a while.
+I threw these changes together as I needed to generate some database schema documentation quickly and found the OraDoclet to be a pretty good solution, although it had a couple of bugs, looked very out of date and hasn’t been updated in quite a while.
 
 Note that the original author of OraDoclet was Vladimir Katchourovski – kudos to him for creating a concise & simple tool.
 
