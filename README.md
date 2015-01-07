@@ -31,3 +31,7 @@ java -jar oradocletplus.jar username/password@hostname:port:sid &lt;output_direc
 for example
 
 java -jar oradocletplus.jar user/password@localhost:1521:mydb C:/temp/oradocs "My Company Inc."
+
+Contributing
+-----
+More details on how to build from source https://github.com/japonicius/oradocletplus/wiki
