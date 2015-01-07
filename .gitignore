@@ -1,3 +1,7 @@
 /oradocletplus/nbproject/private/
 /oradocletplus/build/
 /oradocletplus/dist/
+.classpath
+.gitignore
+.project
+.settings
