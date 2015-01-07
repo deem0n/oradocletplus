@@ -29,4 +29,5 @@ Usage
 java -jar oradocletplus.jar username/password@hostname:port:sid &lt;output_directory> [&lt;copyright_notice>]
 
 for example
+
 java -jar oradocletplus.jar user/password@localhost:1521:mydb C:/temp/oradocs "My Company Inc."
