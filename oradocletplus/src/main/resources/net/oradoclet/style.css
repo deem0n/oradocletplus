@@ -1,0 +1,102 @@
+body {
+	font-family: Calibri,"Myriad Pro","Lucida Grande","Lucida Sans",Verdana,sans-serif;
+	font-size: 15px;
+	color: #f0f0ff;
+	background-color: #476992;
+}
+
+pre, code {
+	font-family: 'Lucida Console', 'Courier New';
+	font-size: 12px;
+}
+
+table {
+	font-size: 15px;
+	border: 1px solid #2C4F78;
+	padding: 0px;
+	margin: 0px;
+    border-collapse: collapse;
+    -webkit-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+    filter:progid:DXImageTransform.Microsoft.dropshadow(OffX=5, OffY=5, Color='#111111');
+    -ms-filter:"progid:DXImageTransform.Microsoft.dropshadow(OffX=5, OffY=5, Color='#111111')";	
+}
+
+thead, tbody {
+	margin: 0px;
+	padding: 0px;
+}
+
+td, th {
+	border: 0px;
+	margin: 0px;
+	padding: 2px 4px 2px 4px;
+	border-right: 1px dashed #466080;
+}
+
+
+.header {
+	background-color: #466080;
+	text-shadow:0 1px 1px black;
+}
+.odd {
+	background-color: #6888AD;
+}
+.even {
+	background-color: #5F83AD;
+}
+
+.even a, .even a:hover , .odd a, .odd a:hover {
+	border-style: none;
+}
+.even a:hover , .odd a:hover {
+	text-decoration: underline;
+}
+
+#topbar a {
+	margin-right: 12px;
+	font-weight: bold;
+	font-size: 16px;;
+}
+
+#topbar h3 {
+	font-size: 28px;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+tr {
+	border: 0px;
+	border-left: 1px solid #2C4F78;
+	border-right: 1px solid #2C4F78;
+	margin: 0px;
+	padding: 0px;
+}
+
+h1 {
+	font-size: 20px;
+}
+h2 {
+	font-size: 18px;
+}
+h3 {
+	font-size: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	text-shadow:0 1px 1px black;
+}
+
+a {
+	color: #E7C083;
+	text-decoration: none;
+	border-bottom: 1px dotted #E7C083;
+	text-shadow:0 1px 1px black;
+}
+a:hover {
+	cursor: 
+	color: #E7BB76;
+	text-decoration: none;
+	border-bottom: 1px solid #E7BB76;
+}
