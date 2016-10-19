@@ -151,18 +151,20 @@ public class OraDictionary {
             // Attention! The constraint is not an Oracle object type.  
             // It is added here for uniformity just if it were an object type
             stmt = connection.createStatement();
-            rset = stmt.executeQuery("SELECT object_type, object_name " 
-                                   + "FROM user_objects "
-                                   + "WHERE object_type IN("
-                                   + supportedTypes 
-                                   + ") "
-                                   + " UNION "  // The USER_OBJECTS view does not show LOB-indexes                                   
-                                   + "SELECT 'INDEX' object_type, index_name object_name " 
-                                   + "FROM user_indexes "
-                                   + " UNION "                                   
-                                   + "SELECT 'CONSTRAINT' object_type, constraint_name object_name " 
-                                   + "FROM user_constraints "
-                                   + "ORDER BY object_type, object_name ");
+            String q = "SELECT object_type, object_name "
+                    + "FROM user_objects "
+                    + "WHERE object_type IN("
+                    + supportedTypes
+                    + ") "
+                    + " UNION "  // The USER_OBJECTS view does not show LOB-indexes
+                    + "SELECT 'INDEX' object_type, index_name object_name "
+                    + "FROM user_indexes "
+                    + " UNION "
+                    + "SELECT 'CONSTRAINT' object_type, constraint_name object_name "
+                    + "FROM user_constraints "
+                    + "ORDER BY object_type, object_name ";
+            System.out.println(q);
+            rset = stmt.executeQuery(q);
             while(null!=rset && rset.next()) {
                 dbobject = new DatabaseObject(new String(rset.getString(1)), new String(rset.getString(2)), null);
                 dbobject.setLink(getObjectLink(dbobject));
@@ -176,14 +178,16 @@ public class OraDictionary {
 
             // Columns are no Oracle-objects, retrieve their data separately, linking to parent tables
             stmt = connection.createStatement();
-            rset = stmt.executeQuery("SELECT uc.column_name object_name, " 
-                                   +       " uc.table_name  parent_name, " 
-                                   +       " uo.object_type parent_type  "
-                                   +  " FROM user_tab_columns uc," 
-                                   +       " user_objects     uo "
-                                   + " WHERE uo.object_type IN ('TABLE','VIEW')" 
-                                   + "   AND uo.object_name = uc.table_name" 
-                                   + " ORDER BY parent_type, parent_name, column_id");                                   
+            q = "SELECT uc.column_name object_name, "
+                    +       " uc.table_name  parent_name, "
+                    +       " uo.object_type parent_type  "
+                    +  " FROM user_tab_columns uc,"
+                    +       " user_objects     uo "
+                    + " WHERE uo.object_type IN ('TABLE','VIEW')"
+                    + "   AND uo.object_name = uc.table_name"
+                    + " ORDER BY parent_type, parent_name, column_id";
+            System.out.println(q);
+            rset = stmt.executeQuery(q);
             while(null!=rset && rset.next()) {
                 key  = DatabaseObject.genKey(rset.getString(3), rset.getString(2));
                 parent  = (DatabaseObject) objectTree.get(key);
@@ -244,7 +248,7 @@ public class OraDictionary {
      * formed according a certain convention, e.g. object_type-OBJECT_NAME.html,
      * spaces are replaced with underscore '_'. 
      * 
-     * @param DatabaseObject dbobject a database object the link will be generated for
+     * @param  dbobject a database object the link will be generated for
      * @return objectLink a relative link to the given object or null if the name is not an object of supported type 
      */
     public String getObjectLink(DatabaseObject dbobject) {
@@ -305,6 +309,7 @@ public class OraDictionary {
      */
     protected void readAttributes(Connection connection, TreeMap objectTree, String objectType, String parentType
         , String query, String[] columnObjectTypes, boolean concatenate) {
+        System.out.println(query);
         Statement      stmt          = null;
         ResultSet      rset          = null;
         DatabaseObject dbobject      = null;

@@ -230,20 +230,21 @@ public class OraDoclet {
             Files.createDirectories(new File(configuration.destdirname).toPath());
 
             try {
-                generate(schema); // Main routine that generates the documentation files
+                generate(); // Main routine that generates the documentation files
             } catch(Exception ex) {
-                writeLog(ex.getMessage(), ERROR, "run()", ex);
+                ex.printStackTrace();
             }
-            // Free the connection resource
-            if(null != connection) {
-                try {
-                    connection.close();
-                } catch(SQLException sqlx) {
-                    // Do nothing
-                }
-            }
-            connection = null;
         }
+
+        // Free the connection resource
+        if(null != connection) {
+            try {
+                connection.close();
+            } catch(SQLException sqlx) {
+                // Do nothing
+            }
+        }
+        connection = null;
     }
 
     
@@ -479,7 +480,7 @@ public class OraDoclet {
      * writers, which will in turn generate the documentation files. At first the 
      * object hierarchy is built, which is used while generating the files.
      */
-    protected void generate(String schema) throws Exception {
+    protected void generate() throws Exception {
         OraDictionary oraDict = new OraDictionary(getDBConnection());
         TreeMap objectTree = oraDict.buildObjectTree();
 

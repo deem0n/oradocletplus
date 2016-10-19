@@ -358,6 +358,8 @@ public class DocFilesetWriter {
      * is always an object name and the column name corresponds to the object type 
      */
     public void generateObjectListFile(HtmlWriter writer, TreeMap objectTree, String objectType, Connection connection, String query) {
+        System.out.println(query);
+
         final String   nbsp ="&nbsp;";
         int colCount = 0;
         DatabaseObject dbobject = null;
