@@ -46,6 +46,7 @@ public class Configuration {
     public String header;    
     public String bottom;    
     public String footer;
+    public Set<String> schemas;
 
     public String applicationTitle;
     public String copyrightLabel;    
@@ -68,5 +69,6 @@ public class Configuration {
         nodeprecated = false;
         excludedDocFileDirs = new HashSet();
         excludedQualifiers = new HashSet();
+        schemas = new LinkedHashSet<>();
     }
 }

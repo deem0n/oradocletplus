@@ -40,7 +40,7 @@ public class DocFilesetWriter {
     private String         copyright    = null;
     private String         encoding     = null;        
 
-    public DocFilesetWriter(Connection  dbconnection, TreeMap objectTree) throws IOException { 
+    public DocFilesetWriter(Connection  dbconnection, TreeMap objectTree) throws IOException {
         this.dbconnection = dbconnection;
         this.objectTree   = objectTree;
         this.title        = OraDoclet.getConfiguration().applicationTitle;

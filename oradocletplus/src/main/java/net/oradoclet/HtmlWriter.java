@@ -298,6 +298,7 @@ public class HtmlWriter extends PrintWriter {
 
     public void head() {
         println(getTag(TAG_HEAD));
+        println("<meta charset=\"UTF-8\">");
     }
 
     public void headEnd() {
@@ -620,7 +621,7 @@ public class HtmlWriter extends PrintWriter {
     }
 
     public String getCodeText(String s) {
-        return "<code>" + s + "</code>";
+        return "<code>" + s.replaceAll("<", "&lt;").replaceAll(">", "&gt;") + "</code>";
     }
 
     public String getFontColor(String s) {

@@ -22,9 +22,16 @@
  */
 package net.oradoclet;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.TreeMap;
 
@@ -121,6 +128,8 @@ public class OraDoclet {
             // Assign the parameters depending on their presence.
             // The parameter order is predefined.
             switch(parameters.length) {
+                // schems:
+                case 4: configuration.schemas.addAll(Arrays.asList(parameters[3].split(",")));
                 // copyright notice:                        
                 case 3: configuration.copyrightLabel = parameters[2];
                         // no break, fall through here
@@ -130,7 +139,7 @@ public class OraDoclet {
                 // connect string:
                 case 1: this.dbconnect = parameters[0];
                         // The title equals to the schema name
-                        configuration.applicationTitle = dbconnect.substring(0, dbconnect.indexOf('/')).toUpperCase();
+                        // configuration.applicationTitle = dbconnect.substring(0, dbconnect.indexOf('/')).toUpperCase();
                         break;
                 default:
                         // Do nothing                                        
@@ -175,27 +184,66 @@ public class OraDoclet {
     }
 
 
+    String targetdir;
+
     /**
      * The main routine of the OraDoclet application
      */
-    public void run() {
+    public void run() throws IOException {
         System.out.println("OraDoclet version " + oraDocletVersion);
+        targetdir = configuration.destdirname;
+
+        HtmlWriter writer = new HtmlWriter(OraDoclet.getConfiguration(), targetdir, "index.html", "UTF-8");
+        writer.html();
+        writer.head();
+        writer.title("");
+        writer.link("rel='stylesheet' type='text/css' href='style.css'");
+        writer.headEnd();
+        writer.body(true);
+
+        for(String schema : configuration.schemas) {
+            writer.println("<h1><a href=\"" + schema + "/index.html\">" + schema + "</a></h1>");
+            writer.br();
+        }
+        writer.hr(1, "noshade");
+        writer.println("<small>"+OraDoclet.PROJ_GEN_STR+", "
+                + " Copyright &copy; " + configuration.copyrightLabel + "</small>");
+        writer.bodyEnd();
+        writer.htmlEnd();
+        writer.close();
+        writer = null;
+
+        FileOutputStream fos = new FileOutputStream(new File(targetdir+"/style.css"));
+        InputStream is = getClass().getResourceAsStream("/net/oradoclet/style.css");
+        int r;
+        while ((r = is.read()) != -1) {
+            fos.write(r);
+        }
+        is.close();
+        fos.close();
 
         connection = getDBConnection();
-        try {
-            generate(); // Main routine that generates the documentation files
-        } catch(Exception ex) {
-            writeLog(ex.getMessage(), ERROR, "run()", ex);            
-        }
-        // Free the connection resource
-        if(null != connection) {
+
+        for(String schema : configuration.schemas){
+            System.out.println("Generate for schema " + schema);
+            configuration.destdirname = targetdir + '/' + schema;
+            Files.createDirectories(new File(configuration.destdirname).toPath());
+
             try {
-                connection.close();
-            } catch(SQLException sqlx) {
-                // Do nothing    
+                generate(schema); // Main routine that generates the documentation files
+            } catch(Exception ex) {
+                writeLog(ex.getMessage(), ERROR, "run()", ex);
             }
+            // Free the connection resource
+            if(null != connection) {
+                try {
+                    connection.close();
+                } catch(SQLException sqlx) {
+                    // Do nothing
+                }
+            }
+            connection = null;
         }
-        connection = null;
     }
 
     
@@ -343,8 +391,7 @@ public class OraDoclet {
             this.connection = getDBConnection(this.dbconnect);
         }
         return this.connection;
-    }    
-        
+    }
 
     /**
      * Obtains a database connection
@@ -367,9 +414,9 @@ public class OraDoclet {
         }
         
         // Analyse the connect string, parse the parameters and detect the connecting method
-        dbUser       = dbconnect.substring(0, dbconnect.indexOf('/'));   
+        dbUser       = dbconnect.substring(0, dbconnect.indexOf('/'));
         dbPassword   = dbconnect.substring(dbconnect.indexOf('/') + 1, dbconnect.indexOf('@'));
-        dbConnectStr = dbconnect.substring(dbconnect.indexOf('@') + 1);        
+        dbConnectStr = dbconnect.substring(dbconnect.indexOf('@') + 1);
         if(dbConnectStr.indexOf(':') > 0) {
             dbProtocol = "thin";
         } else {
@@ -432,7 +479,7 @@ public class OraDoclet {
      * writers, which will in turn generate the documentation files. At first the 
      * object hierarchy is built, which is used while generating the files.
      */
-    protected void generate() throws Exception {
+    protected void generate(String schema) throws Exception {
         OraDictionary oraDict = new OraDictionary(getDBConnection());
         TreeMap objectTree = oraDict.buildObjectTree();
 
@@ -444,7 +491,7 @@ public class OraDoclet {
 
         // Begin the file generation
         // Create a documentation index file and other related files
-        DocFilesetWriter docFilesetWriter = new DocFilesetWriter(getDBConnection(), objectTree);    
+        DocFilesetWriter docFilesetWriter = new DocFilesetWriter(getDBConnection(), objectTree);
         docFilesetWriter.generate(); 
         docFilesetWriter = null;    
 
@@ -454,26 +501,26 @@ public class OraDoclet {
         while(it.hasNext()) {
             dbobject = (DatabaseObject)it.next();
             if(dbobject.getObjectType().equalsIgnoreCase("TABLE")) {
-                ObjectWriter tableWriter = new ObjectWriter(getDBConnection(), objectTree, dbobject, null);    
+                ObjectWriter tableWriter = new ObjectWriter(getDBConnection(), objectTree, dbobject, null);
                 tableWriter.generate(); 
                 tableWriter.close(); // Important, otherwise the writing efforts get lost               
                 tableWriter = null;    
             }
             if(dbobject.getObjectType().equalsIgnoreCase("VIEW")) {
-                ObjectWriter viewWriter = new ViewWriter(getDBConnection(), objectTree, dbobject);    
+                ObjectWriter viewWriter = new ViewWriter(getDBConnection(), objectTree, dbobject);
                 viewWriter.generate(); 
                 viewWriter.close(); // Important, otherwise the writing efforts get lost               
                 viewWriter = null;    
             }
             if(dbobject.getObjectType().equalsIgnoreCase("PROCEDURE")
                 || dbobject.getObjectType().equalsIgnoreCase("FUNCTION")) {
-                ObjectWriter procedureWriter = new ProcedureWriter(getDBConnection(), objectTree, dbobject);    
+                ObjectWriter procedureWriter = new ProcedureWriter(getDBConnection(), objectTree, dbobject);
                 procedureWriter.generate(); 
                 procedureWriter.close(); // Important, otherwise the writing efforts get lost               
                 procedureWriter = null;    
             }
             if(dbobject.getObjectType().equalsIgnoreCase("PACKAGE")) {
-                ObjectWriter packageWriter = new PackageWriter(getDBConnection(), objectTree, dbobject);    
+                ObjectWriter packageWriter = new PackageWriter(getDBConnection(), objectTree, dbobject);
                 packageWriter.generate(); 
                 packageWriter.close(); // Important, otherwise the writing efforts get lost               
                 packageWriter = null;    
