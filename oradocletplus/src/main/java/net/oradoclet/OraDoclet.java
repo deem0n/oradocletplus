@@ -53,7 +53,8 @@ public class OraDoclet {
     private static final String signature = "Database Creators";
     
     /** The reference to this instance of OraDoclet */    
-    private static OraDoclet thisOraDoclet = null; 
+    private static OraDoclet thisOraDoclet = null;
+    public static String CURRENT_SCHEMA;
 
     /** Database connection used by the methods throughout the generation cycle */
     private Connection connection = null;
@@ -225,6 +226,7 @@ public class OraDoclet {
         connection = getDBConnection();
 
         for(String schema : configuration.schemas){
+            OraDoclet.CURRENT_SCHEMA = schema;
             System.out.println("Generate for schema " + schema);
             configuration.destdirname = targetdir + '/' + schema;
             Files.createDirectories(new File(configuration.destdirname).toPath());
