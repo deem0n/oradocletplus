@@ -162,7 +162,7 @@ public class OraDictionary {
                     + " UNION "
                     + "SELECT 'CONSTRAINT' object_type, constraint_name object_name "
                     + "FROM all_constraints WHERE owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
-                    + "ORDER BY object_type, object_name ";
+                    + " ORDER BY object_type, object_name ";
             System.out.println(q);
             rset = stmt.executeQuery(q);
             while(null!=rset && rset.next()) {
@@ -371,7 +371,7 @@ public class OraDictionary {
                         }
                         // Trim(): Some queries return trailing whitespaces
                         // (e.g. if a result set contains a string constant)
-                        value = (null==value ? "" : value.trim());
+                        value = (null==value ? "" : (concatenate?value:value.trim()));
 
                         if(attrName.equalsIgnoreCase(COL_PARENT_NAME)) {
                             // Parent name is not stored with other attributes
@@ -390,7 +390,22 @@ public class OraDictionary {
                             }
                             // This code takes care about the exceedingly long lines
                             if(concatenate) {
-                                value = getStringWithLineBreaks(value, 80, "\r\n\t");
+                                //value = getStringWithLineBreaks(value, 120, "\r\n\t");
+                            }
+
+
+                            if( objectType.equalsIgnoreCase("VIEW") ) {
+                              if (attrName.contains("Code")) {
+                                  value = "<li class='oneline'>"
+                                  + value.replaceAll("&","&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                                  + "</li>";
+                              }
+                            } else {
+                              if (attrName.contains("Code")) {
+                                  value = "<li class='multiline'>"
+                                  + value.replaceAll("&","&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                                  + "</li>";
+                              }
                             }
 
                             if(concatenate && null!=key && key.equals(keyOld)
@@ -399,7 +414,8 @@ public class OraDictionary {
                                     attr = (DatabaseAttribute) attrMatrixLine.elementAt(j);
                                     if(attr.getName().equalsIgnoreCase(attrName)) break;
                                 }
-                                attr.setValue(attr.getValue() + "\r\n" + value);
+                                //attr.setValue(attr.getValue() + "\r\n" + value);
+                                attr.setValue(attr.getValue() + value);
                             } else {
                                 attr = new DatabaseAttribute(attrName, value, attrDBObject, isVisible);
                                 attr.setPreformatted(isPreformatted);
@@ -607,7 +623,7 @@ public class OraDictionary {
               + "  AND ucc.position IS NOT NULL "
               + "   AND ucl.owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
               + "   AND ucc.owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
-              + "ORDER BY \"parent_name\", \"_owner_type\", \"_owner_name\", \"_position\"  ";
+              + " ORDER BY \"parent_name\", \"_owner_type\", \"_owner_name\", \"_position\"  ";
         columnObjectTypes = (new String[] {"COLUMN", "TABLE", null, "INDEX", null});
         readAttributes(connection, objectTree, "COLUMN", "TABLE", query, columnObjectTypes, false);
     }
@@ -666,7 +682,8 @@ public class OraDictionary {
 
         query = "SELECT us.name                                           \"Trigger\", "
               + "       ut.table_name                                     \"parent_name\", "
-              + "       to_clob(us.line||LPAD(':',5 - LENGTH(us.line))||us.text)   \"Code\" "
+              + "       us.text   \"Code\" "
+            //  + "       us.line||LPAD(':',5 - LENGTH(us.line))||to_clob(us.text)   \"Code\" "
               + "  FROM all_source   us, "
               + "       all_triggers ut "
               + " WHERE us.name = ut.trigger_name "
@@ -714,7 +731,8 @@ public class OraDictionary {
         readAttributes(connection, objectTree, "FUNCTION", null, query, columnObjectTypes, false);
 
         query = "SELECT uo.object_name                                    \"Function\", "
-              + "       to_clob(us.line||LPAD(':',5 - LENGTH(us.line))||us.text)   \"Code\" "
+              + "       us.text   \"Code\" "
+            //  + "       us.line||LPAD(':',5 - LENGTH(us.line))||to_clob(us.text)   \"Code\" "
               + "  FROM all_source     us, "
               + "       all_objects    uo  "
               + " WHERE us.name = uo.object_name "
@@ -749,7 +767,8 @@ public class OraDictionary {
         readAttributes(connection, objectTree, "PROCEDURE", null, query, columnObjectTypes, false);
 
         query = "SELECT uo.object_name                                    \"Procedure\", "
-              + "       to_clob(us.line||LPAD(':',5 - LENGTH(us.line))||us.text)   \"Code\" "
+              + "       us.text   \"Code\" "
+              //+ "       us.line||LPAD(':',5 - LENGTH(us.line))||to_clob(us.text)   \"Code\" "
               + "  FROM all_source     us, "
               + "       all_objects    uo  "
               + " WHERE us.name = uo.object_name "
@@ -767,7 +786,8 @@ public class OraDictionary {
         String[] columnObjectTypes;
 
         query = "SELECT uo.object_name                                    \"Package\", "
-              + "       to_clob(us.line||LPAD(':',5 - LENGTH(us.line))||us.text)   \"Package Code\" "
+              + "       us.text   \"Package Code\" "
+              //+ "       us.line||LPAD(':',5 - LENGTH(us.line))||to_clob(us.text)   \"Package Code\" "
               + "  FROM all_source     us, "
               + "       all_objects    uo  "
               + " WHERE us.name = uo.object_name "
@@ -780,7 +800,8 @@ public class OraDictionary {
         readAttributes(connection, objectTree, "PACKAGE", null, query, columnObjectTypes, true);
 
         query = "SELECT uo.object_name                                    \"Package\", "
-              + "       to_clob(us.line||LPAD(':',5 - LENGTH(us.line))||us.text)   \"Package Body Code\" "
+              + "  us.text   \"Package Body Code\" "
+            //  + "  us.line||LPAD(':',5 - LENGTH(us.line))||to_clob(us.text)   \"Package Body Code\" "
               + "  FROM all_source     us, "
               + "       all_objects    uo  "
               + " WHERE us.name = uo.object_name "
