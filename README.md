@@ -1,6 +1,8 @@
-ORADOCLETPLUS
+ORADOCLETPLUS 2016
 =============
 Copyright (C) 2015  Vladimir Katchourovski & Richard Nichols & Viniscius Ribeiro
+
+Copyright (C) 2016  Yuriy Krikun & Dmitry Dorofeev
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,15 +25,32 @@ I threw these changes together as I needed to generate some database schema docu
 
 Note that the original author of OraDoclet was Vladimir Katchourovski – kudos to him for creating a concise & simple tool.
 
+Why this fork A.K.A. what's new?
+-----------
+This fork adds ability to generate docs from several Oracle schemas at once. SQL requests to Oracle database were changed to support this new functionality. HTML formatting was also changed slightly. 
+
+Original SQL to generate line numbers in Oracle was proven not working in case of length of text equal to Oracle maximum of 4000 symbols for varchar2 datatype. Generation of line numbers was reprogrammed in HTML using \<ol\> and \<li\> tags.
+
 Usage
 -----
 
-java -jar oradocletplus.jar username/password@hostname:port:sid &lt;output_directory> [&lt;copyright_notice>]
+java -jar oradocletplus.jar username/password@hostname:port:sid \<output\_directory\> [\<copyright\_notice\>] [\<comma\_separated\_schema\_list\>]
 
-for example
+for example:
 
-java -jar oradocletplus.jar user/password@localhost:1521:mydb C:/temp/oradocs "My Company Inc."
+```
+java -jar oradocletplus.jar user/password@localhost:1521:mydb \
+docs/ "My Company Inc." SCH1,PUB23,SYS_DOCS
+```
+
+Building
+-----
+You need [Maven](https://maven.apache.org/) to compile this project. Firstly, run [install_libs.sh](./oradocletplus/install_libs.sh) to install JDBC and other necessary jars. Secondly, build the project with Maven:
+
+```
+mvn assembly:assembly
+```
 
 Contributing
 -----
-More details on how to build from source https://github.com/japonicius/oradocletplus/wiki
+**!!Outdated!!:** More details on how to build from source https://github.com/japonicius/oradocletplus/wiki
