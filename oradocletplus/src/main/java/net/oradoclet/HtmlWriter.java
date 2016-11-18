@@ -94,7 +94,7 @@ public class HtmlWriter extends PrintWriter {
      */
     public HtmlWriter(Configuration config, String dirname, String filename, String encoding)
         throws IOException, UnsupportedEncodingException {
-        super(getWriter(config, dirname, filename, encoding));
+        super(getWriter(config, dirname, filename, encoding), true);
         configuration = config;
         htmlFilename = filename;
     }

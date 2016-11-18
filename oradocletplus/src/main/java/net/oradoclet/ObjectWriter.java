@@ -24,6 +24,9 @@ package net.oradoclet;
 
 import java.io.*;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -136,7 +139,6 @@ public class ObjectWriter extends HtmlWriter {
      * presented on the description page for this
      * database object type.
      *
-     * @param i The section number
      * @return The section name when the section with the given number exists, null otherwise
      */
     protected int getSectionCount() {
@@ -151,8 +153,6 @@ public class ObjectWriter extends HtmlWriter {
      * @param dbconnection
      * @param objectTree
      * @param dbobject
-     * @param appTitle
-     * @param copyright
      */
     protected void generateObjectAttributes(Connection dbconnection, TreeMap objectTree, DatabaseObject dbobject) {
         write("<div id='object_attributes'>");
@@ -174,7 +174,11 @@ public class ObjectWriter extends HtmlWriter {
         // generate documentation for the object.
         // information about all attributes is printed here
         for (int i = 0; i < getSectionCount(); i++) {
-            listAttributes(dbobject, getSection(i).attributeName, getSection(i).name, getSection(i).tabular, getSection(i).transposed);
+            try {
+                listAttributes(dbobject, getSection(i).attributeName, getSection(i).name, getSection(i).tabular, getSection(i).transposed);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -185,7 +189,7 @@ public class ObjectWriter extends HtmlWriter {
      * @param dbobject
      */
     protected void listAttributes(DatabaseObject dbobject, String attributeName, String sectionName
-        , boolean tabular, boolean transpose) {
+        , boolean tabular, boolean transpose) throws SQLException {
         DatabaseAttribute attr = null;
         Vector  names      = new Vector();
         Vector  attributes = new Vector();
@@ -281,11 +285,42 @@ public class ObjectWriter extends HtmlWriter {
                         } else {
                             attrValue = (null==attr.getValue() || 0==attr.getValue().length()) ? NBSP : attr.getValue();
 
-                            if(attr.isPreformatted()) {
-                                attrValue = "<pre><ol class='code'>"
-                                  + attrValue
-                                  + "</ol></pre>";
+                            // LOOKATME!!!
+                            if(false){ //attr.getName().equals("Package Body Code")){
+                                //System.out.println("================= " + attr.getValue());
+                                attrValue = "<pre><ol class='code'>";
+
+                                String query = "SELECT uo.object_name                                    \"Package\", "
+                                        + "  us.text   \"Package Body Code\" "
+                                        //  + "  us.line||LPAD(':',5 - LENGTH(us.line))||to_clob(us.text)   \"Package Body Code\" "
+                                        + "  FROM all_source     us, "
+                                        + "       all_objects    uo  "
+                                        + " WHERE us.name = uo.object_name "
+                                        + "   AND uo.object_type = 'PACKAGE BODY' "
+                                        + "   AND uo.object_type = us.type "
+                                        + "   AND us.owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
+                                        + "   AND uo.owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
+                                        + "   AND uo.object_name = '" + dbobject.getObjectName() + "'"
+                                        + " ORDER BY uo.object_name, line ";
+                                Statement stmt = dbconnection.createStatement();
+                                ResultSet rs = stmt.executeQuery(query);
+                                while(rs.next()){
+                                    attrValue += ("<li class='multiline'>"
+                                            + rs.getString(2).replaceAll("&","&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                                            + "</li>");
+                                }
+                                rs.close();
+                                stmt.close();
+                                attrValue += "</ol></pre>";
+                                attrTable.put(attrName, attrValue);
+                            } else {
+                                if(attr.isPreformatted()) {
+                                    attrValue = "<pre><ol class='code'>"
+                                            + attrValue
+                                            + "</ol></pre>";
+                                }
                             }
+
                         }
                         // Add the value, for non-tabular(single-line) attributes only if they are not empty
                         if(null!=name && null!=attrValue && (!(!tabular && attrValue.equalsIgnoreCase(NBSP)))) {
@@ -298,12 +333,12 @@ public class ObjectWriter extends HtmlWriter {
         }
 // DEBUG
 /*
-if(dbobject.getObjectName().equalsIgnoreCase("TERMS_BUCHUNG")) {
+//if(dbobject.getObjectName().equalsIgnoreCase("TERMS_BUCHUNG")) {
     System.out.println();
     System.out.println("sectionName=" + sectionName);
     System.out.println(dbobject);
     System.out.println("attrTable=" + attrTable);
-}
+//}
 */
 // DEBUG
         if(attrTable.size() > 0) {
@@ -350,36 +385,76 @@ if(dbobject.getObjectName().equalsIgnoreCase("TERMS_BUCHUNG")) {
                     }
                 }
                 trEnd();
-                // Table rows, one per child object
-                for(int i=0;i<names.size();i++){
+
+                if(sectionName.equals("Package Body Source")){
                     tr();
                     tdAlignVAlign("left","top");
 
-                    String displayedName = (String)names.elementAt(i);
-                    // In case of the single column the value is displayed instead of the name (e.g. source code)
-                    if(1==attributes.size()) {
-                        displayedName = (String) attrTable.get(((String)names.elementAt(i)).toLowerCase() + "." + ((String)attributes.elementAt(0)).toLowerCase());
-                    }
-                    // Truncate the trailing enumeration index
-                    if(displayedName.indexOf('[') > 0) {
-                        displayedName = displayedName.substring(0, displayedName.lastIndexOf('['));
-                    }
+                    print("<pre><ol class='code'>");
 
-                    println(displayedName);
-                    tdEnd();
-                    // Table columns with attribute values
-                    for(int j=1;j<attributes.size();j++) {
-                        td();
-                        if(transpose) {
-                            attrValue = (String) attrTable.get(((String)attributes.elementAt(j)).toLowerCase() + "." + ((String)names.elementAt(i)).toLowerCase());
-                        } else {
-                            attrValue = (String) attrTable.get(((String)names.elementAt(i)).toLowerCase() + "." + ((String)attributes.elementAt(j)).toLowerCase());
-                        }
-                        println(attrValue);
-                        tdEnd();
+                    String query = "SELECT uo.object_name                                    \"Package\", "
+                            + "  us.text   \"Package Body Code\" "
+                            //  + "  us.line||LPAD(':',5 - LENGTH(us.line))||to_clob(us.text)   \"Package Body Code\" "
+                            + "  FROM all_source     us, "
+                            + "       all_objects    uo  "
+                            + " WHERE us.name = uo.object_name "
+                            + "   AND uo.object_type = 'PACKAGE BODY' "
+                            + "   AND uo.object_type = us.type "
+                            + "   AND us.owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
+                            + "   AND uo.owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
+                            + "   AND uo.object_name = '" + dbobject.getObjectName() + "'"
+                            + " ORDER BY uo.object_name, line ";
+                    Statement stmt = dbconnection.createStatement();
+                    ResultSet rs = stmt.executeQuery(query);
+                    while(rs.next()){
+                        print("<li class='multiline'>"
+                                + rs.getString(2).replaceAll("&","&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                                + "</li>");
                     }
+                    rs.close();
+                    stmt.close();
+                    print("</ol></pre>");
+                    flush();
+                    tdEnd();
                     trEnd();
+                } else {
+                    // Table rows, one per child object
+                    for(int i=0;i<names.size();i++){
+                        tr();
+                        tdAlignVAlign("left","top");
+
+                        String displayedName = (String)names.elementAt(i);
+                        // In case of the single column the value is displayed instead of the name (e.g. source code)
+                        if(1==attributes.size()) {
+                            displayedName = (String) attrTable.get(((String)names.elementAt(i)).toLowerCase() + "." + ((String)attributes.elementAt(0)).toLowerCase());
+                        }
+                        // Truncate the trailing enumeration index
+                        if(displayedName.indexOf('[') > 0) {
+                            displayedName = displayedName.substring(0, displayedName.lastIndexOf('['));
+                        }
+
+                        println(displayedName);
+                        tdEnd();
+
+                        // Table columns with attribute values
+                        for(int j=1;j<attributes.size();j++) {
+                            td();
+                            if(transpose) {
+                                attrValue = (String) attrTable.get(((String)attributes.elementAt(j)).toLowerCase() + "." + ((String)names.elementAt(i)).toLowerCase());
+                            } else {
+                                attrValue = (String) attrTable.get(((String)names.elementAt(i)).toLowerCase() + "." + ((String)attributes.elementAt(j)).toLowerCase());
+                            }
+
+                            // LOOKATME!!!
+                            println(attrValue);
+                            flush();
+                            tdEnd();
+                        }
+
+                        trEnd();
+                    }
                 }
+
                 tableEnd();
                 br();
             }

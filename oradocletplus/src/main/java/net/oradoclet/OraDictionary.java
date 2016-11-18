@@ -408,6 +408,10 @@ public class OraDictionary {
                               }
                             }
 
+                            //if(attrName.equals("Package Body Code")){
+                            //    value = "@";
+                            //}
+
                             if(concatenate && null!=key && key.equals(keyOld)
                                 && null!=attrMatrixLine && attrMatrixLine.size() > 0) {
                                 for(int j=0; j<attrMatrixLine.size();j++) {
@@ -452,6 +456,7 @@ public class OraDictionary {
 
                 keyOld = key;
             }
+
             rset.close();
             rset = null;
             stmt.close();
