@@ -516,9 +516,14 @@ public class OraDoclet {
                 viewWriter.close(); // Important, otherwise the writing efforts get lost
                 viewWriter = null;
             }
-            if(dbobject.getObjectType().equalsIgnoreCase("PROCEDURE")
-                || dbobject.getObjectType().equalsIgnoreCase("FUNCTION")) {
+            if(dbobject.getObjectType().equalsIgnoreCase("PROCEDURE")) {
                 ObjectWriter procedureWriter = new ProcedureWriter(getDBConnection(), objectTree, dbobject);
+                procedureWriter.generate();
+                procedureWriter.close(); // Important, otherwise the writing efforts get lost
+                procedureWriter = null;
+            }
+            if(dbobject.getObjectType().equalsIgnoreCase("FUNCTION")) {
+                ObjectWriter procedureWriter = new FunctionWriter(getDBConnection(), objectTree, dbobject);
                 procedureWriter.generate();
                 procedureWriter.close(); // Important, otherwise the writing efforts get lost
                 procedureWriter = null;

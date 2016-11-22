@@ -285,42 +285,11 @@ public class ObjectWriter extends HtmlWriter {
                         } else {
                             attrValue = (null==attr.getValue() || 0==attr.getValue().length()) ? NBSP : attr.getValue();
 
-                            // LOOKATME!!!
-                            if(false){ //attr.getName().equals("Package Body Code")){
-                                //System.out.println("================= " + attr.getValue());
-                                attrValue = "<pre><ol class='code'>";
-
-                                String query = "SELECT uo.object_name                                    \"Package\", "
-                                        + "  us.text   \"Package Body Code\" "
-                                        //  + "  us.line||LPAD(':',5 - LENGTH(us.line))||to_clob(us.text)   \"Package Body Code\" "
-                                        + "  FROM all_source     us, "
-                                        + "       all_objects    uo  "
-                                        + " WHERE us.name = uo.object_name "
-                                        + "   AND uo.object_type = 'PACKAGE BODY' "
-                                        + "   AND uo.object_type = us.type "
-                                        + "   AND us.owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
-                                        + "   AND uo.owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
-                                        + "   AND uo.object_name = '" + dbobject.getObjectName() + "'"
-                                        + " ORDER BY uo.object_name, line ";
-                                Statement stmt = dbconnection.createStatement();
-                                ResultSet rs = stmt.executeQuery(query);
-                                while(rs.next()){
-                                    attrValue += ("<li class='multiline'>"
-                                            + rs.getString(2).replaceAll("&","&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-                                            + "</li>");
-                                }
-                                rs.close();
-                                stmt.close();
-                                attrValue += "</ol></pre>";
-                                attrTable.put(attrName, attrValue);
-                            } else {
-                                if(attr.isPreformatted()) {
-                                    attrValue = "<pre><ol class='code'>"
-                                            + attrValue
-                                            + "</ol></pre>";
-                                }
+                            if(attr.isPreformatted()) {
+                                attrValue = "<pre><ol class='code'>"
+                                        + attrValue
+                                        + "</ol></pre>";
                             }
-
                         }
                         // Add the value, for non-tabular(single-line) attributes only if they are not empty
                         if(null!=name && null!=attrValue && (!(!tabular && attrValue.equalsIgnoreCase(NBSP)))) {
@@ -417,6 +386,38 @@ public class ObjectWriter extends HtmlWriter {
                     flush();
                     tdEnd();
                     trEnd();
+                } else if (sectionName.equals("Procedure Source")) {
+                    tr();
+                    tdAlignVAlign("left","top");
+
+                    print("<pre><ol class='code'>");
+
+                    String query = "SELECT uo.object_name                                    \"Procedure\", "
+                            + "       us.text   \"Code\" "
+                            //+ "       us.line||LPAD(':',5 - LENGTH(us.line))||to_clob(us.text)   \"Code\" "
+                            + "  FROM all_source     us, "
+                            + "       all_objects    uo  "
+                            + " WHERE us.name = uo.object_name "
+                            + "   AND uo.object_type = 'PROCEDURE' "
+                            + "   AND uo.object_type = us.type "
+                            + "   AND us.owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
+                            + "   AND uo.owner = '" + OraDoclet.CURRENT_SCHEMA + "'"
+                            + "   AND uo.object_name = '" + dbobject.getObjectName() + "'"
+                            + " ORDER BY uo.object_name, line ";
+
+                    Statement stmt = dbconnection.createStatement();
+                    ResultSet rs = stmt.executeQuery(query);
+                    while(rs.next()){
+                        print("<li class='multiline'>"
+                                + rs.getString(2).replaceAll("&","&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                                + "</li>");
+                    }
+                    rs.close();
+                    stmt.close();
+                    print("</ol></pre>");
+                    flush();
+                    tdEnd();
+                    trEnd();
                 } else {
                     // Table rows, one per child object
                     for(int i=0;i<names.size();i++){
@@ -445,7 +446,6 @@ public class ObjectWriter extends HtmlWriter {
                                 attrValue = (String) attrTable.get(((String)names.elementAt(i)).toLowerCase() + "." + ((String)attributes.elementAt(j)).toLowerCase());
                             }
 
-                            // LOOKATME!!!
                             println(attrValue);
                             flush();
                             tdEnd();
@@ -460,6 +460,7 @@ public class ObjectWriter extends HtmlWriter {
             }
         }
     }
+
 
     /**
      * Returns the string containing comma-separated names of the columns

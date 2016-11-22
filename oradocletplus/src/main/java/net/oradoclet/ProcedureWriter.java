@@ -59,7 +59,7 @@ public class ProcedureWriter extends ObjectWriter {
         ObjectWriterSection[] s = 
             {new ObjectWriterSection("Arguments",         "Argument name",    true,  false),
              new ObjectWriterSection("Returns",           "Returns",          false, false),
-             new ObjectWriterSection("Source",            "Code",             true,  false)
+             new ObjectWriterSection("Procedure Source",            "Code",             true,  false)
             };
 
         return s;
